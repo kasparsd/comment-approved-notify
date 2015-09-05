@@ -21,7 +21,11 @@ class Comment_Approved {
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
 		
 		$this->default_notification = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
-		$this->default_subject = __( 'Your comment has been approved', 'comment-approved-notify' );
+		$this->default_subject = sprintf(
+			'[%s] %s',
+			get_bloginfo( 'name' ),
+			__( 'Your comment has been approved', 'comment-approved-notify' )
+		);
 
 	}
 
@@ -194,12 +198,14 @@ class Comment_Approved {
 		if ( empty( $notify_me ) || ! $enable || ! is_email( $comment->comment_author_email ) ) {
 			return;
 		}
+
+		$comment_permalink = get_permalink( $comment->comment_post_ID );
 			
 		$map_fields = array(
 			'[name]' => $comment->comment_author,
-			'[permalink]' => get_permalink( $comment->comment_post_ID ),
+			'[permalink]' => $comment_permalink,
 			'%name%' => $comment->comment_author,
-			'%permalink%' => get_permalink( $comment->comment_post_ID ),
+			'%permalink%' => $comment_permalink,
 		);
 		
 		$notification = get_option( 'comment_approved_message' );
@@ -213,6 +219,7 @@ class Comment_Approved {
 			$subject = $this->default_subject;
 		}					
 		
+		// Replace the shortcodes
 		$notification = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $notification );
 		$subject = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $subject );
 		
