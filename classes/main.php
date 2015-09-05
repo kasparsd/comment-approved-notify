@@ -9,7 +9,7 @@ class CommentApprovedNotify {
 
 		add_action( 'admin_menu', array( $this, 'add_default_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
-		add_filter( 'comment_form_default_fields', array( $this, 'approve_comment_fields' ), 15, 1 );
+		add_action( 'comment_form', array( $this, 'approve_comment_optin' ), 10, 1 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
 		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
 
@@ -224,11 +224,11 @@ class CommentApprovedNotify {
 
 	}
 
-	public function approve_comment_fields( $fields ) {
+	public function approve_comment_optin( $post_id ) {
 
 		$default = get_option( 'comment_approved_default', 0 );
 
-		$fields['notify_me'] = sprintf(
+		printf(
 			'<p class="comment-form-notify-me">
 				<label>
 					<input type="checkbox" %s name="comment-approved_notify-me" value="1" />
@@ -238,8 +238,6 @@ class CommentApprovedNotify {
 			checked( $default, 1, false ),
 			esc_html__( 'Notify me by email when the comment gets approved.', 'comment-approved-notify' )
 		);
-
-		return $fields;
 
 	}
 
