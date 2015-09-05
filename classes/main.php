@@ -1,14 +1,6 @@
 <?php
 
-/**
- * Title: Comment approved
- * Description: Main functions
- * Company: Media-Enzo
- * @author Niels van Renselaar, Kaspars Dambis <hi@kaspars.net>
- * @version 1.4
- */
-
-class Comment_Approved {
+class CommentApprovedNotify {
 
 	private $default_notification;
 	private $default_subject;
