@@ -11,6 +11,7 @@ class CommentApprovedNotify {
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_filter( 'comment_form_default_fields', array( $this, 'approve_comment_fields' ), 15, 1 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
+		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
 
 		$this->default_notification = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
 		$this->default_subject = sprintf(
@@ -217,7 +218,7 @@ class CommentApprovedNotify {
 		$subject = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $subject );
 
 		// Ensure that we notify the user only once
-		update_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', time() );
+		update_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', current_time( 'timestamp', 1 ) );
 
 		wp_mail( $comment->comment_author_email, $subject, $notification );
 
@@ -247,6 +248,40 @@ class CommentApprovedNotify {
 		if ( isset( $_POST['comment-approved_notify-me'] ) ) {
 			add_comment_meta( $comment_id, 'notify_me', mktime() );
 		}
+
+	}
+
+	public function comment_notify_status( $html, $comment ) {
+
+		$enabled = get_option( 'comment_approved_enable', 1 );
+
+		if ( empty( $enabled ) ) {
+			return $html;
+		}
+
+		$notify_me = get_comment_meta( $comment->comment_ID, 'notify_me', true );
+		$notify_sent = get_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', true );
+
+		if ( ! empty( $notify_me ) && ! empty( $notify_sent ) ) {
+			$status = sprintf(
+				__( 'Author was notified of the comment approval on %s at %s.', 'comment-approved-notify' ),
+				date_i18n( get_option( 'date_format' ), $notify_sent, false ),
+				date_i18n( get_option( 'time_format' ), $notify_sent, false )
+			);
+		} elseif ( ! empty( $notify_me ) ) {
+			$status = __( 'Author will be notified of the comment approval.', 'comment-approved-notify' );
+		} else {
+			$status = __( 'Author did not choose to be notified of the comment approval.', 'comment-approved-notify' );
+		}
+
+		$html .= sprintf(
+			'<div class="misc-pub-section">
+				<p>%s</p>
+			</div>',
+			esc_html( $status )
+		);
+
+		return $html;
 
 	}
 
