@@ -235,7 +235,7 @@ class CommentApprovedNotify {
 				</label>
 			</p>',
 			checked( $default, 1, false ),
-			esc_html__( 'Notify me by email when my comment gets approved.', 'comment-approved-notify' )
+			esc_html__( 'Notify me by email when the comment gets approved.', 'comment-approved-notify' )
 		);
 
 		return $fields;
