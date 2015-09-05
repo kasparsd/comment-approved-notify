@@ -230,8 +230,8 @@ class Comment_Approved {
 	public function approve_comment_fields( $fields ) {
 			
 		$default = get_option( 'comment_approved_default', 0 );
-		
-		$fields['notify_me'] = printf(
+
+		$fields['notify_me'] = sprintf(
 			'<p class="comment-form-notify-me">
 				<label>
 					<input type="checkbox" %s name="comment-approved_notify-me" value="1" />
