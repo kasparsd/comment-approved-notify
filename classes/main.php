@@ -110,29 +110,13 @@ class Comment_Approved {
 			</div>
 			<?php endif; ?>
 		
-			<h2><?php esc_html_e( 'Comment approved', 'comment-approved-notify' ); ?></h2>
-			<p><?php esc_html_e( 'This notification is sent to the user that has left the comment, after you approve an comment. The message is not sent to comments that has been approved before.', 'comment-approved-notify' ); ?></p>
-		
-			<blockquote>
-				<?php esc_html_e( 'Available shortcodes: [permalink], [name]', 'comment-approved-notify' ); ?>
-			</blockquote>
+			<h1><?php esc_html_e( 'Comment approved', 'comment-approved-notify' ); ?></h1>
+			<p><?php esc_html_e( 'This notification is sent to comment authors after you manually approve their comment.', 'comment-approved-notify' ); ?></p>
 			
 			<form method="post">
 				<?php wp_nonce_field( 'comment_approved_settings' ); ?>
 				
 				<table class="form-table" id="wp-comment-approved-settings">
-					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Subject', 'comment-approved-notify' ); ?></label></th>
-						<td>
-							<input type="text" name="comment_approved_subject" value="<?php echo esc_attr( $subject ); ?>" />
-						</td>
-					</tr>
-					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Message', 'comment-approved-notify' ); ?></label></th>
-						<td>
-							<textarea cols="50" rows="10" name="comment_approved_message"><?php echo esc_textarea( $message ); ?></textarea>
-						</td>
-					</tr>
 					<tr class="default-row">
 						<th><label><?php esc_html_e( 'Enable', 'comment-approved-notify' ); ?></label></th>
 						<td>
@@ -145,6 +129,22 @@ class Comment_Approved {
 						<td>
 							<input type="checkbox" name="comment_approved_default" value="1" <?php checked( $default ); ?> />
 							<?php esc_html_e( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ); ?>
+						</td>
+					</tr>
+					<tr class="default-row">
+						<th><label><?php esc_html_e( 'Subject', 'comment-approved-notify' ); ?></label></th>
+						<td>
+							<input type="text" name="comment_approved_subject" class="large-text" value="<?php echo esc_attr( $subject ); ?>" />
+						</td>
+					</tr>
+					<tr class="default-row">
+						<th><label><?php esc_html_e( 'Message', 'comment-approved-notify' ); ?></label></th>
+						<td>
+							<textarea cols="50" rows="10" class="large-text" name="comment_approved_message"><?php echo esc_textarea( $message ); ?></textarea>
+							<p class="help">
+								<?php esc_html_e( 'Available shortcodes:', 'comment-approved-notify' ); ?>
+								<code>[permalink]</code>, <code>[name]</code>
+							</p>
 						</td>
 					</tr>
 					<tr class="default-row">
