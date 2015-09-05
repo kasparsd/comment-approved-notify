@@ -20,17 +20,22 @@ This plugin is a fork of the [Comment Approved](https://wordpress.org/plugins/co
 
 ## Installation
 
-1. Upload the folder `comment-approved` to the `/wp-content/plugins/` directory
+1. Upload the folder `comment-approved-notify` to the `/wp-content/plugins/` directory
 2. Activate the plugin through the 'Plugins' menu in WordPress
 3. The settings are accessible trough the settings menu in the sidebar
 
 
 ## Screenshots
 
-1. The settings screen
+1. Comment approval notification settings
 
 
 ## Changelog
+
+### 1.4
+
+* Simplify the codebase
+* Enable notifications if Jetpack Comments are detected since they don't support the opt-in checkbox
 
 ### 1.3.2.1
 
