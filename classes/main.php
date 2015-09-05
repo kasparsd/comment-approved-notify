@@ -7,19 +7,19 @@
  * @author Niels van Renselaar, Kaspars Dambis <hi@kaspars.net>
  * @version 1.4
  */
- 
+
 class Comment_Approved {
 
 	private $default_notification;
 	private $default_subject;
 
 	protected function __construct() {
-		
+
 		add_action( 'admin_menu', array( $this, 'add_default_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_filter( 'comment_form_default_fields', array( $this, 'approve_comment_fields' ), 15, 1 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
-		
+
 		$this->default_notification = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
 		$this->default_subject = sprintf(
 			'[%s] %s',
@@ -30,7 +30,7 @@ class Comment_Approved {
 	}
 
 	public static function instance() {
-		
+
 		static $instance;
 
 		if ( ! isset( $instance ) ) {
@@ -40,82 +40,82 @@ class Comment_Approved {
 		return $instance;
 
 	}
-	
+
 	public function add_default_settings() {
-		
+
 		// @todo Move to settings API
 		add_submenu_page(
 			'options-general.php',
-			__( 'Comment approved', 'comment-approved-notify' ), 
-			__( 'Comment approved', 'comment-approved-notify' ), 
+			__( 'Comment approved', 'comment-approved-notify' ),
+			__( 'Comment approved', 'comment-approved-notify' ),
 			'manage_options',
 			'comment_approved-settings',
 			array( $this, 'settings' ),
 			'dashicons-admin-tools'
 		);
-		
+
 	}
-	
+
 	public function settings() {
-	
+
 		$updated = false;
-		
+
 		if ( isset( $_POST['comment_approved_settings'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'comment_approved_settings' ) ) {
 			wp_die( 'Could not verify nonce' );
 		}
 
 		if ( isset( $_POST['comment_approved_settings'] ) ) {
-			
+
 			$message = esc_html( $_POST['comment_approved_message'] );
 			$subject = esc_html( $_POST['comment_approved_subject'] );
-			
+
 			update_option( 'comment_approved_message', $message );
 			update_option( 'comment_approved_subject', $subject );
-			
+
 			if ( isset( $_POST['comment_approved_enable'] ) ) {
 				update_option( 'comment_approved_enable', 1 );
 			} else {
 				update_option( 'comment_approved_enable', 0 );
 			}
-			
+
 			if ( isset( $_POST['comment_approved_default'] ) ) {
 				update_option( 'comment_approved_default', 1 );
 			} else {
 				update_option( 'comment_approved_default', 0 );
 			}
-			
+
 			$updated = true;
-			
+
 		}
-		
+
 		$message = get_option( 'comment_approved_message' );
 		$subject = get_option( 'comment_approved_subject' );
 		$enable = get_option( 'comment_approved_enable', 1 );
 		$default = get_option( 'comment_approved_default', 0 );
-		
+
 		if ( empty( $message ) ) {
 			$message = $this->default_notification;
 		}
-		
+
 		if ( empty( $subject ) ) {
 			$subject = $this->default_subject;
 		}
-		
+
 		?>
 		<div class="wrap">
-		
+
 			<?php if ( $updated ) : ?>
 			<div id="message" class="updated fade">
 				<p><?php esc_html_e( 'Options saved', 'comment-approved-notify' ) ?></p>
 			</div>
 			<?php endif; ?>
-		
+
 			<h1><?php esc_html_e( 'Comment approved', 'comment-approved-notify' ); ?></h1>
 			<p><?php esc_html_e( 'This notification is sent to comment authors after you manually approve their comment.', 'comment-approved-notify' ); ?></p>
-			
+
 			<form method="post">
 				<?php wp_nonce_field( 'comment_approved_settings' ); ?>
-				
+
 				<table class="form-table" id="wp-comment-approved-settings">
 					<tr class="default-row">
 						<th><label><?php esc_html_e( 'Enable', 'comment-approved-notify' ); ?></label></th>
@@ -152,35 +152,36 @@ class Comment_Approved {
 						<td>
 							<input type="submit" class="button submit" name="comment_approved_settings" value="<?php esc_attr_e( 'Save', 'comment-approved-notify' ); ?>" />
 						</td>
-					</tr>				
+					</tr>
 				</table>
 			</form>
-			
+
 		</div>
 		<?php
-		
+
 	}
 
 	public function should_notify_comment_author( $comment ) {
 
-		if ( is_object( $comment ) ) {
+		if ( is_object( $comment ) && isset( $comment->comment_ID ) ) {
 			$comment_id = $comment->comment_ID;
 		} else {
 			$comment_id = $comment;
 		}
 
 		$notify_me = get_comment_meta( $comment_id, 'notify_me', true );
+		$notify_sent = get_comment_meta( $comment_id, 'comment_approve_notify_sent', true );
 
-		if ( empty( $notify_me ) ) {
-			return false;
-		} else {
+		if ( ! empty( $notify_me ) && empty( $notify_sent ) ) {
 			return true;
+		} else {
+			return false;
 		}
 
 	}
-	
+
 	public function approve_comment_callback( $new_status, $old_status, $comment ) {
-	
+
 		// Notify only if the comment is approved
 		if ( $old_status === $new_status || 'approved' !== $new_status ) {
 			return;
@@ -193,42 +194,45 @@ class Comment_Approved {
 		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'comments' ) ) {
 			$notify_me = true;
 		}
-		
+
 		// Ensure that we can actually notify the comment author
 		if ( empty( $notify_me ) || ! $enable || ! is_email( $comment->comment_author_email ) ) {
 			return;
 		}
 
-		$comment_permalink = get_permalink( $comment->comment_post_ID );
-			
+		$comment_permalink = get_comment_link( $comment );
+
 		$map_fields = array(
 			'[name]' => $comment->comment_author,
 			'[permalink]' => $comment_permalink,
 			'%name%' => $comment->comment_author,
 			'%permalink%' => $comment_permalink,
 		);
-		
+
 		$notification = get_option( 'comment_approved_message' );
 		$subject = get_option( 'comment_approved_subject' );
-		
+
 		if ( empty( $notification ) ) {
 			$notification = $this->default_notification;
 		}
-	
+
 		if ( empty( $subject ) ) {
 			$subject = $this->default_subject;
-		}					
-		
+		}
+
 		// Replace the shortcodes
 		$notification = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $notification );
 		$subject = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $subject );
-		
+
+		// Ensure that we notify the user only once
+		update_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', time() );
+
 		wp_mail( $comment->comment_author_email, $subject, $notification );
-		
+
 	}
-	
+
 	public function approve_comment_fields( $fields ) {
-			
+
 		$default = get_option( 'comment_approved_default', 0 );
 
 		$fields['notify_me'] = sprintf(
@@ -241,17 +245,17 @@ class Comment_Approved {
 			checked( $default, 1, false ),
 			esc_html__( 'Notify me by email when my comment gets approved.', 'comment-approved-notify' )
 		);
-		
+
 		return $fields;
-		
+
 	}
-	
+
 	public function approve_comment_posted( $comment_id, $comment_object ) {
-		
-		if ( isset( $_POST['comment-approved_notify-me'] ) ) {	
+
+		if ( isset( $_POST['comment-approved_notify-me'] ) ) {
 			add_comment_meta( $comment_id, 'notify_me', mktime() );
 		}
-		
+
 	}
 
 }
