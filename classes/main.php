@@ -11,10 +11,9 @@
 class Comment_Approved {
 
 	private $default_notification;
+	private $default_subject;
 
-	public function __construct() {
-	
-		global $wp_comment_approved;
+	protected function __construct() {
 		
 		add_action( 'admin_menu', array( $this, 'add_default_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
@@ -23,6 +22,18 @@ class Comment_Approved {
 		
 		$this->default_notification = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
 		$this->default_subject = __( 'Your comment has been approved', 'comment-approved-notify' );
+
+	}
+
+	public static function instance() {
+		
+		static $instance;
+
+		if ( ! isset( $instance ) ) {
+			$instance = new self();
+		}
+
+		return $instance;
 
 	}
 	

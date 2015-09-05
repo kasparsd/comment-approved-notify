@@ -16,4 +16,4 @@ include dirname( __FILE__ ) . '/classes/main.php';
 // Initialize
 global $wp_comment_approved;
 
-$wp_comment_approved = new Comment_Approved();
+$wp_comment_approved = Comment_Approved::instance();
