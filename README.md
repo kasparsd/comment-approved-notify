@@ -55,22 +55,28 @@ This plugin is a fork of the [Comment Approved](https://wordpress.org/plugins/co
 * Option added for users to opt-in on notifications
 
 ### 1.3
+
 * Added option to change the subject (thanks Karl)
 
 ### 1.2.1
+
 * Added plugin icons. Credits for Max Steenbergen / maxsteenbergen.com
 
 ### 1.2
+
 * This is a security fix. Please update
 
 ### 1.1
+
 * Translation error fixed
 
 ### 1.0
+
 * Initial release
 
 
 ## Upgrade Notice
 
 ### 1.0
+
 * First version
