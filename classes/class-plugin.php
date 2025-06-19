@@ -407,7 +407,7 @@ class Plugin {
 
 	public function action_add_meta_boxes() {
 		add_meta_box(
-			'comment-notify-status',
+			self::SETTINGS_SLUG,
 			__( 'Comment Notifications', 'comment-approved-notify' ),
 			array( $this, 'action_meta_box_comment_notify_status' ),
 			'comment',
