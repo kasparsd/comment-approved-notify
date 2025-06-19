@@ -167,9 +167,9 @@ class CommentApprovedNotify {
 
 		if ( ! empty( $notify_me ) && empty( $notify_sent ) ) {
 			return true;
-		} else {
-			return false;
 		}
+
+		return false;
 
 	}
 
@@ -184,7 +184,7 @@ class CommentApprovedNotify {
 		$notify_me = $this->should_notify_comment_author( $comment->comment_ID );
 
 		// Jetpack comments doesn't allow authors to opt-in so we do it automatically
-		if ( class_exists( 'Jetpack' ) && Jetpack::is_module_active( 'comments' ) ) {
+		if ( class_exists( Jetpack::class ) && Jetpack::is_module_active( 'comments' ) ) {
 			$notify_me = true;
 		}
 
