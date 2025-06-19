@@ -372,11 +372,6 @@ class Plugin {
 		$comment_notify = new Comment( $comment );
 		$notify_me = $comment_notify->should_notify_approve();
 
-		// Jetpack comments doesn't allow authors to opt-in so we do it automatically.
-		if ( class_exists( \Jetpack::class ) && \Jetpack::is_module_active( 'comments' ) ) {
-			$notify_me = true;
-		}
-
 		// Ensure that we can actually notify the comment author.
 		if ( empty( $notify_me ) ) {
 			return;
