@@ -13,6 +13,12 @@ Domain Path: /languages/
 
 use Comment_Notifications\Plugin;
 
+require_once __DIR__ . '/classes/settings/class-field.php';
+require_once __DIR__ . '/classes/settings/class-field-checkbox.php';
+require_once __DIR__ . '/classes/settings/class-field-text.php';
+require_once __DIR__ . '/classes/settings/class-field-textarea.php';
+require_once __DIR__ . '/classes/settings/class-store.php';
+require_once __DIR__ . '/classes/settings/class-store-option.php';
 require_once __DIR__ . '/classes/class-comment.php';
 require_once __DIR__ . '/classes/class-plugin.php';
 

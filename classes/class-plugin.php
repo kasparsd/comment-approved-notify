@@ -2,12 +2,19 @@
 
 namespace Comment_Notifications;
 
+use Comment_Notifications\Settings\Field;
+use Comment_Notifications\Settings\Field_Checkbox;
+use Comment_Notifications\Settings\Field_Text;
+use Comment_Notifications\Settings\Field_Textarea;
+use Comment_Notifications\Settings\Store_Option;
+use WP_Comment;
+
 class Plugin {
 	private string $plugin_file;
 
-	private const string SETTINGS_SLUG = 'comment_notifications';
+	private const SETTINGS_SLUG = 'comment_notifications';
 
-	private const string SETTINGS_SECTION_APPROVE = 'comment_notifications__approve';
+	private const SETTINGS_SECTION_APPROVE = 'comment_notifications__approve';
 
 	public function __construct( string $plugin_file ) {
 		$this->plugin_file = $plugin_file;
@@ -64,9 +71,59 @@ class Plugin {
 
 		add_settings_section(
 			self::SETTINGS_SECTION_APPROVE,
-			__( 'Comment Approval Notifications', 'comment-approved-notify' ),
+			__( 'Comment Approval', 'comment-approved-notify' ),
 			null,
 			self::SETTINGS_SLUG
+		);
+
+		$this->add_settings_field(
+			new Field_Checkbox(
+				new Store_Option( 'comment_approved_enable' ),
+				[
+					'title' => __( 'Approval Notifications', 'comment-approved-notify' ),
+					'label' => __( 'Allow users to opt-in to notifications when a comment is approved', 'comment-approved-notify' ),
+				]
+			),
+			self::SETTINGS_SECTION_APPROVE
+		);
+
+		$this->add_settings_field(
+			new Field_Checkbox(
+				new Store_Option( 'comment_approved_default' ),
+				[
+					'title' => __( 'Default Setting', 'comment-approved-notify' ),
+					'label' => __( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ),
+				]
+			),
+			self::SETTINGS_SECTION_APPROVE
+		);
+
+		$this->add_settings_field(
+			new Field_Text(
+				new Store_Option( 'comment_approved_subject' ),
+				[
+					'title' => __( 'Subject', 'comment-approved-notify' ),
+					'input_classes' => 'large-text',
+				]
+			),
+			self::SETTINGS_SECTION_APPROVE
+		);
+
+		$this->add_settings_field(
+			new Field_Textarea(
+				new Store_Option( 'comment_approved_message' ),
+				[
+					'title' => __( 'Message', 'comment-approved-notify' ),
+					'input_classes' => 'large-text',
+					'rows' => 10,
+					'help' => sprintf(
+						/* translators: %s is a list of available shortcodes */
+						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
+						'<code>[permalink]</code>, <code>[name]</code>, <code>[post_title]</code>, <code>[post_permalink]</code>'
+					),
+				]
+			),
+			self::SETTINGS_SECTION_APPROVE
 		);
 
 		// add_action( 'load-' . $hook, [ $this, 'action_render_settings' ] );
@@ -78,10 +135,6 @@ class Plugin {
 			$field->id(),
 			[ 'sanitize_callback' => [ $field, 'sanitize' ] ]
 		);
-
-		$classes = [
-			$field->setting( 'required' ) ? 'mail-pilot__settings-field-required' : null,
-		];
 
 		add_settings_field(
 			$field->id(),
@@ -110,7 +163,6 @@ class Plugin {
 			$section,
 			[
 				'label_for' => $field->id(),
-				'class' => implode( ' ', array_filter( $classes ) ),
 			]
 		);
 	}
@@ -176,7 +228,7 @@ class Plugin {
 		$notify_me = $comment_notify->should_notify_approve();
 
 		// Jetpack comments doesn't allow authors to opt-in so we do it automatically.
-		if ( class_exists( Jetpack::class ) && Jetpack::is_module_active( 'comments' ) ) {
+		if ( class_exists( \Jetpack::class ) && \Jetpack::is_module_active( 'comments' ) ) {
 			$notify_me = true;
 		}
 
