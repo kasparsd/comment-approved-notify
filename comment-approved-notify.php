@@ -11,6 +11,6 @@ Text Domain: comment-approved-notify
 Domain Path: /languages/
 */
 
-include dirname( __FILE__ ) . '/classes/main.php';
+require_once __DIR__ . '/classes/main.php';
 
-CommentApprovedNotify::instance();
+add_action( 'plugins_loaded', [ CommentApprovedNotify::class, 'instance' ] );
