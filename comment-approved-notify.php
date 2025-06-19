@@ -3,7 +3,7 @@
 Plugin Name: Comment Notifications
 Plugin URI:
 Description: Notify comment authors when their comments are approved or receive replies.
-Version: 1.4-dev
+Version: 2.0.0
 Requires at least: 3.0
 Author: Kaspars Dambis
 Author URI: https://kaspars.net
