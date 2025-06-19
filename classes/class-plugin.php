@@ -16,10 +16,24 @@ class Plugin {
 
 	private const SETTINGS_SECTION_APPROVE = 'comment_notifications__approve';
 
+	private const SETTINGS_SECTION_REPLY = 'comment_notifications__reply';
+
+	private const SETTINGS_SECTION_ALL_COMMENTS = 'comment_notifications__all_comments';
+
 	private Store_Option $option_approve_enable;
 	private Store_Option $option_approve_default;
 	private Store_Option $option_approve_subject;
 	private Store_Option $option_approve_message;
+
+	private Store_Option $option_reply_enable;
+	private Store_Option $option_reply_default;
+	private Store_Option $option_reply_subject;
+	private Store_Option $option_reply_message;
+
+	private Store_Option $option_all_comments_enable;
+	private Store_Option $option_all_comments_default;
+	private Store_Option $option_all_comments_subject;
+	private Store_Option $option_all_comments_message;
 
 	public function __construct( string $plugin_file ) {
 		$this->plugin_file = $plugin_file;
@@ -28,6 +42,16 @@ class Plugin {
 		$this->option_approve_default = new Store_Option( 'comment_approved_default' );
 		$this->option_approve_subject = new Store_Option( 'comment_approved_subject' );
 		$this->option_approve_message = new Store_Option( 'comment_approved_message' );
+
+		$this->option_reply_enable = new Store_Option( 'comment_reply_enable' );
+		$this->option_reply_default = new Store_Option( 'comment_reply_default' );
+		$this->option_reply_subject = new Store_Option( 'comment_reply_subject' );
+		$this->option_reply_message = new Store_Option( 'comment_reply_message' );
+
+		$this->option_all_comments_enable = new Store_Option( 'comment_all_comments_enable' );
+		$this->option_all_comments_default = new Store_Option( 'comment_all_comments_default' );
+		$this->option_all_comments_subject = new Store_Option( 'comment_all_comments_subject' );
+		$this->option_all_comments_message = new Store_Option( 'comment_all_comments_message' );
 	}
 
 	public function init() {
@@ -79,6 +103,25 @@ class Plugin {
 			array( $this, 'settings' ),
 		);
 
+		$shortcodes_available = [
+			'permalink',
+			'name',
+			'post_title',
+			'post_permalink',
+		];
+
+		$shortcodes = implode( 
+			', ', 
+			array_map(
+				fn ( $shortcode ) => sprintf( '<code>[%s]</code>', $shortcode ),
+				$shortcodes_available
+			)
+		);
+
+		/**
+		 * Comment Approvals.
+		 */
+
 		add_settings_section(
 			self::SETTINGS_SECTION_APPROVE,
 			__( 'Comment Approval', 'comment-approved-notify' ),
@@ -91,7 +134,8 @@ class Plugin {
 				$this->option_approve_enable,
 				[
 					'title' => __( 'Approval Notifications', 'comment-approved-notify' ),
-					'label' => __( 'Allow users to opt-in to notifications when a comment is approved', 'comment-approved-notify' ),
+					'label' => __( 'Enable notifications for comment approvals', 'comment-approved-notify' ),
+					'help' => __( 'Enable email notification to the comment author when their comment is approved.', 'comment-approved-notify' ),
 				]
 			),
 			self::SETTINGS_SECTION_APPROVE
@@ -102,7 +146,8 @@ class Plugin {
 				$this->option_approve_default,
 				[
 					'title' => __( 'Default Setting', 'comment-approved-notify' ),
-					'label' => __( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ),
+					'label' => __( 'Enable by default', 'comment-approved-notify' ),
+					'help' => __( 'Set the comment approval notificaions as enabled by default in the comment form.', 'comment-approved-notify' ),
 				]
 			),
 			self::SETTINGS_SECTION_APPROVE
@@ -112,7 +157,7 @@ class Plugin {
 			new Field_Text(
 				$this->option_approve_subject,
 				[
-					'title' => __( 'Subject', 'comment-approved-notify' ),
+					'title' => __( 'Email Subject', 'comment-approved-notify' ),
 					'input_classes' => 'large-text',
 				]
 			),
@@ -123,17 +168,143 @@ class Plugin {
 			new Field_Textarea(
 				$this->option_approve_message,
 				[
-					'title' => __( 'Message', 'comment-approved-notify' ),
+					'title' => __( 'Email Message', 'comment-approved-notify' ),
 					'input_classes' => 'large-text',
-					'rows' => 10,
+					'rows' => 8,
 					'help' => sprintf(
 						/* translators: %s is a list of available shortcodes */
 						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
-						'<code>[permalink]</code>, <code>[name]</code>, <code>[post_title]</code>, <code>[post_permalink]</code>'
+						$shortcodes
 					),
 				]
 			),
 			self::SETTINGS_SECTION_APPROVE
+		);
+
+		/**
+		 * Comment Replies.
+		 */
+
+		add_settings_section(
+			self::SETTINGS_SECTION_REPLY,
+			__( 'Comment Replies', 'comment-approved-notify' ),
+			null,
+			self::SETTINGS_SLUG
+		);
+
+		$this->add_settings_field(
+			new Field_Checkbox(
+				$this->option_reply_enable,
+				[
+					'title' => __( 'Reply Notifications', 'comment-approved-notify' ),
+					'label' => __( 'Enable notifications of replies to user comments', 'comment-approved-notify' ),
+					'help' => __( 'Enable email notification to the comment author when someone replies to their comment.', 'comment-approved-notify' ),
+				]
+			),
+			self::SETTINGS_SECTION_REPLY
+		);
+
+		$this->add_settings_field(
+			new Field_Checkbox(
+				$this->option_reply_default,
+				[
+					'title' => __( 'Default Setting', 'comment-approved-notify' ),
+					'label' => __( 'Enable by default', 'comment-approved-notify' ),
+					'help' => __( 'Set the comment reply notificaions as enabled by default in the comment form.', 'comment-approved-notify' ),
+				]
+			),
+			self::SETTINGS_SECTION_REPLY
+		);
+
+		$this->add_settings_field(
+			new Field_Text(
+				$this->option_reply_subject,
+				[
+					'title' => __( 'Email Subject', 'comment-approved-notify' ),
+					'input_classes' => 'large-text',
+				]
+			),
+			self::SETTINGS_SECTION_REPLY
+		);
+
+		$this->add_settings_field(
+			new Field_Textarea(
+				$this->option_reply_message,
+				[
+					'title' => __( 'Email Message', 'comment-approved-notify' ),
+					'input_classes' => 'large-text',
+					'rows' => 8,
+					'help' => sprintf(
+						/* translators: %s is a list of available shortcodes */
+						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
+						$shortcodes
+					),
+				]
+			),
+			self::SETTINGS_SECTION_REPLY
+		);
+
+		/**
+		 * All Post Comments.
+		 */
+
+		add_settings_section(
+			self::SETTINGS_SECTION_ALL_COMMENTS,
+			__( 'All Post Comments', 'comment-approved-notify' ),
+			null,
+			self::SETTINGS_SLUG
+		);
+
+		$this->add_settings_field(
+			new Field_Checkbox(
+				$this->option_all_comments_enable,
+				[
+					'title' => __( 'Comment Notifications', 'comment-approved-notify' ),
+					'label' => __( 'Enable notifications of all new comments on the same post', 'comment-approved-notify' ),
+					'help' => __( 'Enable email notification to the comment author of all future comments on the same post.', 'comment-approved-notify' ),
+				]
+			),
+			self::SETTINGS_SECTION_ALL_COMMENTS
+		);
+
+		$this->add_settings_field(
+			new Field_Checkbox(
+				$this->option_all_comments_default,
+				[
+					'title' => __( 'Default Setting', 'comment-approved-notify' ),
+					'label' => __( 'Enable by default', 'comment-approved-notify' ),
+					'help' => __( 'Set the all comments notificaions as enabled by default in the comment form.', 'comment-approved-notify' ),
+				]
+			),
+			self::SETTINGS_SECTION_ALL_COMMENTS
+		);
+
+		$this->add_settings_field(
+			new Field_Text(
+				$this->option_all_comments_subject,
+				[
+					'title' => __( 'Email Subject', 'comment-approved-notify' ),
+					'input_classes' => 'large-text',
+				]
+			),
+			self::SETTINGS_SECTION_ALL_COMMENTS
+		);
+
+		$this->add_settings_field(
+			new Field_Textarea(
+				$this->option_all_comments_message,
+				[
+					'title' => __( 'Email Message', 'comment-approved-notify' ),
+					'input_classes' => 'large-text',
+					'rows' => 8,
+					'help' => sprintf(
+						/* translators: %s is a list of available shortcodes */
+						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
+						$shortcodes
+					),
+				]
+			),
+			self::SETTINGS_SECTION_ALL_COMMENTS
 		);
 
 		// add_action( 'load-' . $hook, [ $this, 'action_render_settings' ] );
