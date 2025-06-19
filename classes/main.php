@@ -241,8 +241,10 @@ class CommentApprovedNotify {
 	}
 
 	public function comment_notify_status( $html, $comment ) {
-		$notify_me = get_comment_meta( $comment->comment_ID, 'notify_me', true );
-		$notify_sent = get_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', true );
+		$comment_notify = new Comment( $comment );
+
+		$notify_me = $comment_notify->is_notify_approve_enabled();
+		$notify_sent = $comment_notify->get_approve_notified_timestamp();
 
 		if ( ! empty( $notify_me ) && ! empty( $notify_sent ) ) {
 			$status = sprintf(
