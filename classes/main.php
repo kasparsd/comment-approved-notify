@@ -204,16 +204,8 @@ class CommentApprovedNotify {
 			'%permalink%' => $comment_permalink,
 		);
 
-		$notification = get_option( 'comment_approved_message' );
-		$subject = get_option( 'comment_approved_subject' );
-
-		if ( empty( $notification ) ) {
-			$notification = $this->default_notification;
-		}
-
-		if ( empty( $subject ) ) {
-			$subject = $this->default_subject;
-		}
+		$notification = $this->get_approved_email_message();
+		$subject = $this->get_approved_email_subject();
 
 		// Replace the shortcodes
 		$notification = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $notification );
