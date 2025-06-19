@@ -127,6 +127,10 @@ class Plugin {
 		return (bool) $this->option_all_comments_enable->get();
 	}
 
+	private function get_settings_url(): string {
+		return admin_url( 'options-general.php?page=' . self::SETTINGS_SLUG );
+	}
+
 	public function action_register_settings() {
 		$hook = add_options_page(
 			__( 'Comment Notifications', 'comment-approved-notify' ),
@@ -445,9 +449,11 @@ class Plugin {
 		}
 
 		printf( 
-			'<p>%s</p><ul>%s</ul>',
+			'<p>%s</p><ul>%s</ul><p><a class="button" href="%s">%s</a>',
 			esc_html__( 'Comment author enabled email notifications when:', 'comment-approved-notify' ),
-			implode( '', $fields ) 
+			implode( '', $fields ),
+			esc_url( $this->get_settings_url() ),
+			esc_html__( 'Notification Settings', 'comment-approved-notify' )
 		);
 	}
 
