@@ -1,0 +1,10 @@
+{
+    "require-dev": {
+        "roots/wordpress": "^6.8"
+    },
+    "config": {
+        "allow-plugins": {
+            "roots/wordpress-core-installer": true
+        }
+    }
+}

@@ -1,0 +1,9 @@
+{
+	"private": true,
+	"devDependencies": {
+		"@wordpress/env": "^10.25.0"
+	},
+	"scripts": {
+		"env": "wp-env"
+	}
+}
