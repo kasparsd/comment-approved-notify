@@ -2,24 +2,12 @@
 
 class CommentApprovedNotify {
 
-	private $default_notification;
-	private $default_subject;
-
 	protected function __construct() {
-
 		add_action( 'admin_menu', array( $this, 'add_default_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_action( 'comment_form', array( $this, 'approve_comment_optin' ), 10, 1 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
 		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
-
-		$this->default_notification = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
-		$this->default_subject = sprintf(
-			'[%s] %s',
-			get_bloginfo( 'name' ),
-			__( 'Your comment has been approved', 'comment-approved-notify' )
-		);
-
 	}
 
 	public static function instance() {
@@ -32,6 +20,30 @@ class CommentApprovedNotify {
 
 		return $instance;
 
+	}
+
+	private function get_approved_email_message() {
+		$message = get_option( 'comment_approved_message' );
+
+		if ( ! empty( $message ) ) {
+			return $message;
+		}
+
+		return __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
+	}
+
+	private function get_approved_email_subject() {
+		$subject = get_option( 'comment_approved_subject' );
+
+		if ( ! empty( $subject ) ) {
+			return $subject;
+		}
+
+		return sprintf(
+			'[%s] %s',
+			get_bloginfo( 'name' ),
+			__( 'Your comment has been approved', 'comment-approved-notify' )
+		);
 	}
 
 	public function add_default_settings() {
@@ -81,18 +93,10 @@ class CommentApprovedNotify {
 
 		}
 
-		$message = get_option( 'comment_approved_message' );
-		$subject = get_option( 'comment_approved_subject' );
+		$message = $this->get_approved_email_message();
+		$subject = $this->get_approved_email_subject();
 		$enable = get_option( 'comment_approved_enable', 1 );
 		$default = get_option( 'comment_approved_default', 0 );
-
-		if ( empty( $message ) ) {
-			$message = $this->default_notification;
-		}
-
-		if ( empty( $subject ) ) {
-			$subject = $this->default_subject;
-		}
 
 		?>
 		<div class="wrap">
