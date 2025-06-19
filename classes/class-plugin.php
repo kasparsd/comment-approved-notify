@@ -16,8 +16,12 @@ class Plugin {
 
 	private const SETTINGS_SECTION_APPROVE = 'comment_notifications__approve';
 
+	private Store_Option $option_approve_enable;
+
 	public function __construct( string $plugin_file ) {
 		$this->plugin_file = $plugin_file;
+
+		$this->option_approve_enable = new Store_Option( 'comment_approved_enable' );
 	}
 
 	public function init() {
@@ -53,7 +57,7 @@ class Plugin {
 	}
 
 	private function is_approve_email_enabled(): bool {
-		return (bool) get_option( 'comment_approved_enable', 1 );
+		return (bool) $this->option_approve_enable->get();
 	}
 
 	private function is_approve_email_by_default(): bool {
@@ -78,7 +82,7 @@ class Plugin {
 
 		$this->add_settings_field(
 			new Field_Checkbox(
-				new Store_Option( 'comment_approved_enable' ),
+				$this->option_approve_enable,
 				[
 					'title' => __( 'Approval Notifications', 'comment-approved-notify' ),
 					'label' => __( 'Allow users to opt-in to notifications when a comment is approved', 'comment-approved-notify' ),
