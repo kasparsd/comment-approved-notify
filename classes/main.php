@@ -48,8 +48,12 @@ class CommentApprovedNotify {
 		);
 	}
 
-	private function is_approved_email_enabled() {
+	private function is_approve_email_enabled(): bool {
 		return (bool) get_option( 'comment_approved_enable', 1 );
+	}
+
+	private function is_approve_email_by_default(): bool {
+		return (bool) get_option( 'comment_approved_default', 0 );
 	}
 
 	public function add_default_settings() {
@@ -99,8 +103,8 @@ class CommentApprovedNotify {
 
 		$message = $this->get_approved_email_message();
 		$subject = $this->get_approved_email_subject();
-		$enable = $this->is_approved_email_enabled();
-		$default = get_option( 'comment_approved_default', 0 );
+		$enable = $this->is_approve_email_enabled();
+		$default = $this->is_approve_email_by_default();
 
 		?>
 		<div class="wrap">
@@ -202,9 +206,6 @@ class CommentApprovedNotify {
 	}
 
 	public function approve_comment_optin( $post_id ) {
-
-		$default = get_option( 'comment_approved_default', 0 );
-
 		printf(
 			'<p class="comment-form-notify-me">
 				<label>
@@ -212,10 +213,9 @@ class CommentApprovedNotify {
 					%s
 				</label>
 			</p>',
-			checked( $default, 1, false ),
+			checked( $this->is_approve_email_by_default(), 1, false ),
 			esc_html__( 'Notify me by email when the comment gets approved.', 'comment-approved-notify' )
 		);
-
 	}
 
 	public function approve_comment_posted( $comment_id, $comment_object ) {
