@@ -125,15 +125,19 @@ class CommentApprovedNotify {
 					<tr class="default-row">
 						<th><label><?php esc_html_e( 'Enable', 'comment-approved-notify' ); ?></label></th>
 						<td>
-							<input type="checkbox" name="comment_approved_enable" value="1" <?php checked( $enable ); ?> />
-							<?php esc_html_e( 'Enable comment approved message', 'comment-approved-notify' ); ?>
+							<label>
+								<input type="checkbox" name="comment_approved_enable" value="1" <?php checked( $enable ); ?> />
+								<?php esc_html_e( 'Enable comment approved message', 'comment-approved-notify' ); ?>
+							</label>
 						</td>
 					</tr>
 					<tr class="default-row">
 						<th><label><?php esc_html_e( 'Default state', 'comment-approved-notify' ); ?></label></th>
 						<td>
-							<input type="checkbox" name="comment_approved_default" value="1" <?php checked( $default ); ?> />
-							<?php esc_html_e( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ); ?>
+							<label>
+								<input type="checkbox" name="comment_approved_default" value="1" <?php checked( $default ); ?> />
+								<?php esc_html_e( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ); ?>
+							</label>
 						</td>
 					</tr>
 					<tr class="default-row">
