@@ -1,5 +1,7 @@
 <?php
 
+use Comment_Notifications\Comment;
+
 class CommentApprovedNotify {
 
 	protected function __construct() {
@@ -179,23 +181,22 @@ class CommentApprovedNotify {
 
 	}
 
-	public function approve_comment_callback( $new_status, $old_status, $comment ) {
-
+	public function approve_comment_callback( string $new_status, string $old_status, WP_Comment $comment ) {
 		// Notify only if the comment is approved
 		if ( $old_status === $new_status || 'approved' !== $new_status ) {
 			return;
 		}
 
-		$enable = $this->is_approved_email_enabled();
-		$notify_me = $this->should_notify_comment_author( $comment->comment_ID );
+		$comment_notify = new Comment( $comment );
+		$notify_me = $comment_notify->should_notify_approve();
 
-		// Jetpack comments doesn't allow authors to opt-in so we do it automatically
+		// Jetpack comments doesn't allow authors to opt-in so we do it automatically.
 		if ( class_exists( Jetpack::class ) && Jetpack::is_module_active( 'comments' ) ) {
 			$notify_me = true;
 		}
 
-		// Ensure that we can actually notify the comment author
-		if ( empty( $notify_me ) || ! $enable || ! is_email( $comment->comment_author_email ) ) {
+		// Ensure that we can actually notify the comment author.
+		if ( empty( $notify_me ) ) {
 			return;
 		}
 
@@ -216,10 +217,7 @@ class CommentApprovedNotify {
 		$subject = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $subject );
 
 		// Ensure that we notify the user only once
-		update_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', current_time( 'timestamp', 1 ) );
-
-		wp_mail( $comment->comment_author_email, $subject, $notification );
-
+		$comment_notify->notify_approve( $notification, $subject );
 	}
 
 	public function approve_comment_optin( $post_id ) {
