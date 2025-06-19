@@ -244,13 +244,6 @@ class CommentApprovedNotify {
 	}
 
 	public function comment_notify_status( $html, $comment ) {
-
-		$enabled = get_option( 'comment_approved_enable', 1 );
-
-		if ( empty( $enabled ) ) {
-			return $html;
-		}
-
 		$notify_me = get_comment_meta( $comment->comment_ID, 'notify_me', true );
 		$notify_sent = get_comment_meta( $comment->comment_ID, 'comment_approve_notify_sent', true );
 
