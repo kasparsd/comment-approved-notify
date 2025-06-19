@@ -46,6 +46,10 @@ class CommentApprovedNotify {
 		);
 	}
 
+	private function is_approved_email_enabled() {
+		return (bool) get_option( 'comment_approved_enable', 1 );
+	}
+
 	public function add_default_settings() {
 
 		// @todo Move to settings API
@@ -93,7 +97,7 @@ class CommentApprovedNotify {
 
 		$message = $this->get_approved_email_message();
 		$subject = $this->get_approved_email_subject();
-		$enable = get_option( 'comment_approved_enable', 1 );
+		$enable = $this->is_approved_email_enabled();
 		$default = get_option( 'comment_approved_default', 0 );
 
 		?>
@@ -182,7 +186,7 @@ class CommentApprovedNotify {
 			return;
 		}
 
-		$enable = get_option( 'comment_approved_enable', 1 );
+		$enable = $this->is_approved_email_enabled();
 		$notify_me = $this->should_notify_comment_author( $comment->comment_ID );
 
 		// Jetpack comments doesn't allow authors to opt-in so we do it automatically
