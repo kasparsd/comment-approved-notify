@@ -27,7 +27,7 @@ class Field_Textarea extends Field {
 			esc_attr( $this->setting( 'placeholder' ) ),
 			esc_attr( $this->setting( 'rows' ) ),
 			disabled( $this->is_disabled(), true, false ),
-			esc_textarea( $this->get() )
+			esc_textarea( $this->get() ?? '' )
 		);
 
 		$help = $this->help();
