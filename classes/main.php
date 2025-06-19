@@ -123,16 +123,16 @@ class CommentApprovedNotify {
 
 				<table class="form-table" id="wp-comment-approved-settings">
 					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Enable', 'comment-approved-notify' ); ?></label></th>
+						<th><label><?php esc_html_e( 'Approval Notifications', 'comment-approved-notify' ); ?></label></th>
 						<td>
 							<label>
 								<input type="checkbox" name="comment_approved_enable" value="1" <?php checked( $enable ); ?> />
-								<?php esc_html_e( 'Enable comment approved message', 'comment-approved-notify' ); ?>
+								<?php esc_html_e( 'Allow users to opt-in to notifications when a comment is approved', 'comment-approved-notify' ); ?>
 							</label>
 						</td>
 					</tr>
 					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Default state', 'comment-approved-notify' ); ?></label></th>
+						<th><label><?php esc_html_e( 'Default Setting', 'comment-approved-notify' ); ?></label></th>
 						<td>
 							<label>
 								<input type="checkbox" name="comment_approved_default" value="1" <?php checked( $default ); ?> />
