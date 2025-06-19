@@ -11,12 +11,24 @@ class Comment {
 
 	private const META_KEY_NOTIFY_APPROVE_SENT = 'comment_approve_notify_sent';
 
+	private const META_KEY_NOTIFY_REPLIES = 'comment_notifications__notify_replies';
+
+	private const META_KEY_NOTIFY_ALL = 'comment_notifications__notify_all';
+
 	public function __construct( WP_Comment $comment ) {
 		$this->comment = $comment;
 	}
 
 	public static function from_comment_id( int $comment_id ): self {
 		return new self( get_comment( $comment_id ) );
+	}
+
+	public function get_email(): ?string {
+		if ( ! empty( $this->comment->comment_author_email ) && is_email( $this->comment->comment_author_email ) ) {
+			return $this->comment->comment_author_email;
+		}
+
+		return null;
 	}
 
 	public function is_notify_approve_enabled(): bool {
@@ -39,13 +51,11 @@ class Comment {
 		return $this->is_notify_approve_enabled() && ! $this->is_approve_notified();
 	}
 
-	public function notify_approve( string $message, string $subject ): bool {
-		if ( ! is_email( $this->comment->comment_author_email ) && $this->should_notify_approve() ) {
-			wp_mail( $this->comment->comment_author_email, $subject, $message );
+	public function notify( string $message, string $subject ): bool {
+		$email_to = $this->get_email();
 
-			$this->set_approve_notified();
-
-			return true;
+		if ( $email_to ) {
+			return wp_mail( $email_to, $subject, $message );
 		}
 
 		return false;
