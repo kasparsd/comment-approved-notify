@@ -105,8 +105,8 @@ class CommentApprovedNotify {
 			</div>
 			<?php endif; ?>
 
-			<h1><?php esc_html_e( 'Comment approved', 'comment-approved-notify' ); ?></h1>
-			<p><?php esc_html_e( 'This notification is sent to comment authors after you manually approve their comment.', 'comment-approved-notify' ); ?></p>
+			<h1><?php esc_html_e( 'Comment Notifications', 'comment-approved-notify' ); ?></h1>
+			<p><?php esc_html_e( 'Configure notifications sent to comment authors.', 'comment-approved-notify' ); ?></p>
 
 			<form method="post">
 				<?php wp_nonce_field( 'comment_approved_settings' ); ?>
