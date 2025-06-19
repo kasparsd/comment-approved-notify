@@ -202,15 +202,17 @@ class CommentApprovedNotify {
 			$map_fields[ sprintf( '%%%s%%', $key ) ] = $key_value;
 		}
 		
-		$notification = $this->get_approved_email_message();
-		$subject = $this->get_approved_email_subject();
+		// Replace the shortcodes.
+		$notification = $this->replace_shortcodes( $this->get_approved_email_message(), $map_fields );
+		$subject = $this->replace_shortcodes( $this->get_approved_email_subject(), $map_fields );
 
-		// Replace the shortcodes
-		$notification = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $notification );
-		$subject = str_replace( array_keys( $map_fields ), array_values( $map_fields ), $subject );
+		if ( $notification && $subject ) {
+			$comment_notify->notify_approve( $notification, $subject );
+		}
+	}
 
-		// Ensure that we notify the user only once
-		$comment_notify->notify_approve( $notification, $subject );
+	private function replace_shortcodes( string $text, array $shortcodes ): string {
+		return str_replace( array_keys( $shortcodes ), array_values( $shortcodes ), $text );
 	}
 
 	public function approve_comment_optin( $post_id ) {
