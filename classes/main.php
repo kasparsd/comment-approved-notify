@@ -152,7 +152,10 @@ class CommentApprovedNotify {
 							<textarea cols="50" rows="10" class="large-text" name="comment_approved_message"><?php echo esc_textarea( $message ); ?></textarea>
 							<p class="help">
 								<?php esc_html_e( 'Available shortcodes:', 'comment-approved-notify' ); ?>
-								<code>[permalink]</code>, <code>[name]</code>
+								<code>{permalink}</code>, 
+								<code>{name}</code>,
+								<code>{post_title}</code>
+								<code>{post_permalink}</code>
 							</p>
 						</td>
 					</tr>
@@ -199,6 +202,7 @@ class CommentApprovedNotify {
 		$map_fields = [];
 		foreach ( $template_values as $key => $key_value ) {
 			$map_fields[ sprintf( '[%s]', $key ) ] = $key_value;
+			$map_fields[ sprintf( '{%s}', $key ) ] = $key_value;
 			$map_fields[ sprintf( '%%%s%%', $key ) ] = $key_value;
 		}
 		
