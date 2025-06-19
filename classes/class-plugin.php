@@ -61,9 +61,17 @@ class Plugin {
 		add_action( 'init', [ $this, 'action_populate_defaults' ], 0 ); // Translations can be loaded only during init or later.
 		add_action( 'admin_menu', array( $this, 'action_register_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
-		add_action( 'comment_form', array( $this, 'approve_comment_optin' ), 10, 1 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
 		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
+		add_filter( 'comment_form_fields', [ $this, 'filter_comment_form_fields' ], 20 );
+	}
+
+	public function filter_comment_form_fields( array $fields ): array {
+		if ( ! empty( $fields ) ) {
+			$fields = array_merge( $fields, $this->get_comment_fields() );
+		}
+		
+		return $fields;
 	}
 
 	public function action_populate_defaults() {
@@ -73,6 +81,14 @@ class Plugin {
 			get_bloginfo( 'name' ),
 			__( 'Your comment has been approved', 'comment-approved-notify' )
 		);
+	}
+
+	private function is_comment_replies_enabled(): bool {
+		return (bool) get_option( 'thread_comments' );
+	}
+
+	private function is_comment_moderation_enabled(): bool {
+		return (bool) get_option( 'comment_previously_approved' ) || (bool) get_option( 'comment_moderation' );
 	}
 
 	private function get_approve_email_message() {
@@ -101,6 +117,14 @@ class Plugin {
 
 	private function is_approve_email_by_default(): bool {
 		return (bool) $this->option_approve_default->get();
+	}
+
+	private function is_replies_email_enabled(): bool {
+		return (bool) $this->option_approve_enable->get();
+	}
+
+	private function is_all_comments_email_enabled(): bool {
+		return (bool) $this->option_all_comments_enable->get();
 	}
 
 	public function action_register_settings() {
@@ -418,29 +442,60 @@ class Plugin {
 		return str_replace( array_keys( $shortcodes ), array_values( $shortcodes ), $text );
 	}
 
-	public function approve_comment_optin( $post_id ) {
-		if ( ! $this->is_approve_email_enabled() ) {
-			return;
+	private function get_comment_fields(): array {
+		$fields = [];
+
+		if ( $this->is_comment_moderation_enabled() && $this->is_approve_email_enabled() ) {
+			$fields[ self::SETTINGS_SECTION_APPROVE ] = sprintf(
+				'<p class="%1$s">
+					<label>
+						<input type="checkbox" name="%1$s" %2$s value="1" />
+						%3$s
+					</label>
+				</p>',
+				esc_attr( self::SETTINGS_SECTION_APPROVE ),
+				checked( $this->is_approve_email_by_default(), true, false ),
+				esc_html__( 'Email me when my comment gets approved.', 'comment-approved-notify' )
+			);
 		}
 
-		printf(
-			'<p class="comment-form-notify-me">
-				<label>
-					<input type="checkbox" %s name="comment-approved_notify-me" value="1" />
-					%s
-				</label>
-			</p>',
-			checked( $this->is_approve_email_by_default(), true, false ),
-			esc_html__( 'Notify me by email when the comment gets approved.', 'comment-approved-notify' )
-		);
+		if ( $this->is_comment_replies_enabled() && $this->is_replies_email_enabled() ) {
+			$fields[ self::SETTINGS_SECTION_REPLY ] = sprintf(
+				'<p class="%1$s">
+					<label>
+						<input type="checkbox" name="%1$s" %2$s value="1" />
+						%3$s
+					</label>
+				</p>',
+				esc_attr( self::SETTINGS_SECTION_REPLY ),
+				checked( false, true, false ),
+				esc_html__( 'Email me when someone replies to my comment.', 'comment-approved-notify' )
+			);
+		}
+
+		if ( $this->is_all_comments_email_enabled() ) {
+			$fields[ self::SETTINGS_SECTION_REPLY ] = sprintf(
+				'<p class="%1$s">
+					<label>
+						<input type="checkbox" name="%1$s" %2$s value="1" />
+						%3$s
+					</label>
+				</p>',
+				esc_attr( self::SETTINGS_SECTION_REPLY ),
+				checked( false, true, false ),
+				esc_html__( 'Email me all new comments.', 'comment-approved-notify' )
+			);
+		}
+
+		return $fields;
 	}
 
 	public function approve_comment_posted( $comment_id, $comment_object ) {
+		$comment_notify = new Comment( $comment_object );
 
-		if ( isset( $_POST['comment-approved_notify-me'] ) ) {
-			add_comment_meta( $comment_id, 'notify_me', time() );
+		if ( $this->is_approve_email_enabled() && isset( $_POST['comment-approved_notify-me'] ) ) {
+			$comment_notify->enable_notify_approve();
 		}
-
 	}
 
 	public function comment_notify_status( $html, $comment ) {
