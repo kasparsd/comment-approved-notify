@@ -554,9 +554,17 @@ class Plugin {
 
 	public function approve_comment_posted( $comment_id, $comment_object ) {
 		$comment_notify = new Comment( $comment_object );
-
-		if ( $this->is_approve_email_enabled() && isset( $_POST['comment-approved_notify-me'] ) ) {
+		
+		if ( $this->is_approve_email_enabled() && ! empty( $_POST[ SELF::SETTINGS_SECTION_REPLY ] ) ) {
 			$comment_notify->enable_notify_approve();
+		}
+
+		if ( $this->is_replies_email_enabled() && ! empty( $_POST[ SELF::SETTINGS_SECTION_REPLY ] ) ) {
+			$comment_notify->enable_notify_replies();
+		}
+
+		if ( $this->is_all_comments_email_enabled() && ! empty( $_POST[ SELF::SETTINGS_SECTION_ALL_COMMENTS ] ) ) {
+			$comment_notify->enable_notify_all_comments();
 		}
 	}
 }

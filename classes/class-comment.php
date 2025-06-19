@@ -39,6 +39,14 @@ class Comment {
 		return (bool) update_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_APPROVE, time() );
 	}
 
+	public function enable_notify_replies(): bool {
+		return (bool) update_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_REPLIES, time() );
+	}
+
+	public function enable_notify_all_comments(): bool {
+		return (bool) update_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_ALL, time() );
+	}
+
 	public function is_notify_approve_enabled(): bool {
 		return (bool) get_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_APPROVE, true );
 	}
