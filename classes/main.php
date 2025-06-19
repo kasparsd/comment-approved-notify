@@ -50,8 +50,8 @@ class CommentApprovedNotify {
 
 		// @todo Move to settings API
 		add_options_page(
-			__( 'Comment approved', 'comment-approved-notify' ),
-			__( 'Comment approved', 'comment-approved-notify' ),
+			__( 'Comment Notifications', 'comment-approved-notify' ),
+			__( 'Comment Notifications', 'comment-approved-notify' ),
 			'manage_options',
 			'comment_approved-settings',
 			array( $this, 'settings' ),
