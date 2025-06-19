@@ -25,6 +25,9 @@ class Plugin {
 	private Store_Option $option_approve_subject;
 	private Store_Option $option_approve_message;
 
+	private ?string $notify_approve_subject_default;
+	private ?string $notify_approve_message_default;
+
 	private Store_Option $option_reply_enable;
 	private Store_Option $option_reply_default;
 	private Store_Option $option_reply_subject;
@@ -55,6 +58,7 @@ class Plugin {
 	}
 
 	public function init() {
+		add_action( 'init', [ $this, 'action_populate_defaults' ], 0 ); // Translations can be loaded only during init or later.
 		add_action( 'admin_menu', array( $this, 'action_register_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_action( 'comment_form', array( $this, 'approve_comment_optin' ), 10, 1 );
@@ -62,28 +66,33 @@ class Plugin {
 		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
 	}
 
-	private function get_approved_email_message() {
+	public function action_populate_defaults() {
+		$this->notify_approve_message_default = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
+		$this->notify_approve_subject_default = sprintf(
+			'[%s] %s',
+			get_bloginfo( 'name' ),
+			__( 'Your comment has been approved', 'comment-approved-notify' )
+		);
+	}
+
+	private function get_approve_email_message() {
 		$message = $this->option_approve_message->get();
 
 		if ( ! empty( $message ) ) {
 			return $message;
 		}
 
-		return __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
+		return $this->notify_approve_subject_default;
 	}
 
-	private function get_approved_email_subject() {
+	private function get_approve_email_subject() {
 		$subject = $this->option_approve_subject->get();
 
 		if ( ! empty( $subject ) ) {
 			return $subject;
 		}
 
-		return sprintf(
-			'[%s] %s',
-			get_bloginfo( 'name' ),
-			__( 'Your comment has been approved', 'comment-approved-notify' )
-		);
+		return $this->notify_approve_message_default;
 	}
 
 	private function is_approve_email_enabled(): bool {
@@ -159,6 +168,7 @@ class Plugin {
 				[
 					'title' => __( 'Email Subject', 'comment-approved-notify' ),
 					'input_classes' => 'large-text',
+					'placeholder' => $this->notify_approve_subject_default,
 				]
 			),
 			self::SETTINGS_SECTION_APPROVE
@@ -170,6 +180,7 @@ class Plugin {
 				[
 					'title' => __( 'Email Message', 'comment-approved-notify' ),
 					'input_classes' => 'large-text',
+					'placeholder' => $this->notify_approve_message_default,
 					'rows' => 8,
 					'help' => sprintf(
 						/* translators: %s is a list of available shortcodes */
@@ -391,8 +402,8 @@ class Plugin {
 		}
 		
 		// Replace the shortcodes.
-		$notification = $this->replace_shortcodes( $this->get_approved_email_message(), $map_fields );
-		$subject = $this->replace_shortcodes( $this->get_approved_email_subject(), $map_fields );
+		$notification = $this->replace_shortcodes( $this->get_approve_email_message(), $map_fields );
+		$subject = $this->replace_shortcodes( $this->get_approve_email_subject(), $map_fields );
 
 		if ( $notification && $subject ) {
 			$notified = $comment_notify->notify( $notification, $subject );
