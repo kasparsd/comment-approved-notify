@@ -62,8 +62,8 @@ class Plugin {
 		add_action( 'admin_menu', array( $this, 'action_register_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
-		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
 		add_filter( 'comment_form_fields', [ $this, 'filter_comment_form_fields' ], 20 );
+		add_action( 'add_meta_boxes', [ $this, 'action_add_meta_boxes' ] );
 	}
 
 	public function filter_comment_form_fields( array $fields ): array {
@@ -401,6 +401,56 @@ class Plugin {
 		<?php
 	}
 
+	public function action_add_meta_boxes() {
+		add_meta_box(
+			'comment-notify-status',
+			__( 'Comment Notifications', 'comment-approved-notify' ),
+			array( $this, 'action_meta_box_comment_notify_status' ),
+			'comment',
+			'normal'
+		);
+	}
+
+	public function action_meta_box_comment_notify_status( WP_Comment $comment ) {
+		$comment_notify = new Comment( $comment );
+
+		// TODO: show the last notification timestamp for each.
+		$fields = [
+			self::SETTINGS_SECTION_APPROVE => [
+				'label' => __( 'comment is approved', 'comment-approved-notify' ),
+				'checked' => $comment_notify->is_notify_approve_enabled(),
+			],
+			self::SETTINGS_SECTION_REPLY => [
+				'label' => __( 'comment has replies', 'comment-approved-notify' ),
+				'checked' => false, // $comment_notify->is_notify_reply_enabled(),
+			],
+			self::SETTINGS_SECTION_ALL_COMMENTS => [
+				'label' => __( 'all new comments on the same post', 'comment-approved-notify' ),
+				'checked' => false, // $comment_notify->is_notify_all_comments_enabled(),
+			],
+		];
+
+		foreach ( $fields as $section => $field ) {
+			$fields[ $section ] = sprintf(
+				'<li class="%1$s">
+					<label>
+						<input type="checkbox" name="%1$s" %2$s />
+						%3$s
+					</label>
+				</li>',
+				esc_attr( $section ),
+				checked( $field['checked'], true, false ),
+				esc_html( $field['label'] )
+			);
+		}
+
+		printf( 
+			'<p>%s</p><ul>%s</ul>',
+			esc_html__( 'Comment author enabled email notifications when:', 'comment-approved-notify' ),
+			implode( '', $fields ) 
+		);
+	}
+
 	public function approve_comment_callback( string $new_status, string $old_status, WP_Comment $comment ) {
 		// Notify only if the comment is approved
 		if ( $old_status === $new_status || 'approved' !== $new_status ) {
@@ -503,34 +553,4 @@ class Plugin {
 			$comment_notify->enable_notify_approve();
 		}
 	}
-
-	public function comment_notify_status( $html, $comment ) {
-		$comment_notify = new Comment( $comment );
-
-		$notify_me = $comment_notify->is_notify_approve_enabled();
-		$notify_sent = $comment_notify->get_approve_notified_timestamp();
-
-		if ( ! empty( $notify_me ) && ! empty( $notify_sent ) ) {
-			$status = sprintf(
-				__( 'Author was notified of the comment approval on %s at %s.', 'comment-approved-notify' ),
-				date_i18n( get_option( 'date_format' ), $notify_sent, false ),
-				date_i18n( get_option( 'time_format' ), $notify_sent, false )
-			);
-		} elseif ( ! empty( $notify_me ) ) {
-			$status = __( 'Author will be notified of the comment approval.', 'comment-approved-notify' );
-		} else {
-			$status = __( 'Author did not choose to be notified of the comment approval.', 'comment-approved-notify' );
-		}
-
-		$html .= sprintf(
-			'<div class="misc-pub-section">
-				<p>%s</p>
-			</div>',
-			esc_html( $status )
-		);
-
-		return $html;
-
-	}
-
 }
