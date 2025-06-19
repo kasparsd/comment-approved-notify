@@ -17,11 +17,17 @@ class Plugin {
 	private const SETTINGS_SECTION_APPROVE = 'comment_notifications__approve';
 
 	private Store_Option $option_approve_enable;
+	private Store_Option $option_approve_default;
+	private Store_Option $option_approve_subject;
+	private Store_Option $option_approve_message;
 
 	public function __construct( string $plugin_file ) {
 		$this->plugin_file = $plugin_file;
 
 		$this->option_approve_enable = new Store_Option( 'comment_approved_enable' );
+		$this->option_approve_default = new Store_Option( 'comment_approved_default' );
+		$this->option_approve_subject = new Store_Option( 'comment_approved_subject' );
+		$this->option_approve_message = new Store_Option( 'comment_approved_message' );
 	}
 
 	public function init() {
@@ -33,7 +39,7 @@ class Plugin {
 	}
 
 	private function get_approved_email_message() {
-		$message = get_option( 'comment_approved_message' );
+		$message = $this->option_approve_message->get();
 
 		if ( ! empty( $message ) ) {
 			return $message;
@@ -43,7 +49,7 @@ class Plugin {
 	}
 
 	private function get_approved_email_subject() {
-		$subject = get_option( 'comment_approved_subject' );
+		$subject = $this->option_approve_subject->get();
 
 		if ( ! empty( $subject ) ) {
 			return $subject;
@@ -57,11 +63,11 @@ class Plugin {
 	}
 
 	private function is_approve_email_enabled(): bool {
-		return (bool) $this->option_approve_enable->get();
+		return (bool) $this->option_approve_enable->get() ?? true;
 	}
 
 	private function is_approve_email_by_default(): bool {
-		return (bool) get_option( 'comment_approved_default', 0 );
+		return (bool) $this->option_approve_default->get();
 	}
 
 	public function action_register_settings() {
@@ -93,7 +99,7 @@ class Plugin {
 
 		$this->add_settings_field(
 			new Field_Checkbox(
-				new Store_Option( 'comment_approved_default' ),
+				$this->option_approve_default,
 				[
 					'title' => __( 'Default Setting', 'comment-approved-notify' ),
 					'label' => __( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ),
@@ -104,7 +110,7 @@ class Plugin {
 
 		$this->add_settings_field(
 			new Field_Text(
-				new Store_Option( 'comment_approved_subject' ),
+				$this->option_approve_subject,
 				[
 					'title' => __( 'Subject', 'comment-approved-notify' ),
 					'input_classes' => 'large-text',
@@ -115,7 +121,7 @@ class Plugin {
 
 		$this->add_settings_field(
 			new Field_Textarea(
-				new Store_Option( 'comment_approved_message' ),
+				$this->option_approve_message,
 				[
 					'title' => __( 'Message', 'comment-approved-notify' ),
 					'input_classes' => 'large-text',
