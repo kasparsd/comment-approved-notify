@@ -31,6 +31,10 @@ class Comment {
 		return null;
 	}
 
+	public function enable_notify_approve() {
+		return (bool) update_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_APPROVE, time() );
+	}
+
 	public function is_notify_approve_enabled(): bool {
 		return (bool) get_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_APPROVE, true );
 	}
