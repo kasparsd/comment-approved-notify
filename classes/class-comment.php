@@ -24,7 +24,11 @@ class Comment {
 	}
 
 	public function is_approve_notified(): bool {
-		return (bool) get_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_APPROVE_SENT, true );
+		return (bool) $this->get_approve_notified_timestamp();
+	}
+
+	public function get_approve_notified_timestamp(): int {
+		return (int) get_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_APPROVE_SENT, true );
 	}
 
 	public function set_approve_notified(): void {
