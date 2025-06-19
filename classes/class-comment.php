@@ -34,4 +34,16 @@ class Comment {
 	public function should_notify_approve(): bool {
 		return $this->is_notify_approve_enabled() && ! $this->is_approve_notified();
 	}
+
+	public function notify_approve( string $message, string $subject ): bool {
+		if ( ! is_email( $this->comment->comment_author_email ) && $this->should_notify_approve() ) {
+			wp_mail( $this->comment->comment_author_email, $subject, $message );
+
+			$this->set_approve_notified();
+
+			return true;
+		}
+
+		return false;
+	}
 }
