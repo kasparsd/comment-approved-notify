@@ -216,6 +216,10 @@ class CommentApprovedNotify {
 	}
 
 	public function approve_comment_optin( $post_id ) {
+		if ( ! $this->is_approve_email_enabled() ) {
+			return;
+		}
+
 		printf(
 			'<p class="comment-form-notify-me">
 				<label>
