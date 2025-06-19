@@ -227,7 +227,7 @@ class CommentApprovedNotify {
 					%s
 				</label>
 			</p>',
-			checked( $this->is_approve_email_by_default(), 1, false ),
+			checked( $this->is_approve_email_by_default(), true, false ),
 			esc_html__( 'Notify me by email when the comment gets approved.', 'comment-approved-notify' )
 		);
 	}
