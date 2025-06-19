@@ -141,6 +141,9 @@ class Plugin {
 			'name',
 			'post_title',
 			'post_permalink',
+			'comment_content',
+			'comment_permalink',
+			'comment_author',
 		];
 
 		$shortcodes = implode( 
@@ -417,6 +420,9 @@ class Plugin {
 			'permalink' => get_comment_link( $comment ),
 			'post_title' => get_the_title( $comment->comment_post_ID ),
 			'post_permalink' => get_permalink( $comment->comment_post_ID ),
+			'comment_content' => $comment->comment_content,
+			'comment_permalink' => get_comment_link( $comment ),
+			'comment_author' => $comment->comment_author,
 		);
 
 		$map_fields = [];
