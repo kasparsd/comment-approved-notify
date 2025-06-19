@@ -168,42 +168,6 @@ class Plugin {
 	}
 
 	public function settings() {
-
-		$updated = false;
-
-		if ( isset( $_POST['comment_approved_settings'] ) && ! wp_verify_nonce( $_POST['_wpnonce'], 'comment_approved_settings' ) ) {
-			wp_die( 'Could not verify nonce' );
-		}
-
-		if ( isset( $_POST['comment_approved_settings'] ) ) {
-
-			$message = esc_html( $_POST['comment_approved_message'] );
-			$subject = esc_html( $_POST['comment_approved_subject'] );
-
-			update_option( 'comment_approved_message', $message );
-			update_option( 'comment_approved_subject', $subject );
-
-			if ( isset( $_POST['comment_approved_enable'] ) ) {
-				update_option( 'comment_approved_enable', 1 );
-			} else {
-				update_option( 'comment_approved_enable', 0 );
-			}
-
-			if ( isset( $_POST['comment_approved_default'] ) ) {
-				update_option( 'comment_approved_default', 1 );
-			} else {
-				update_option( 'comment_approved_default', 0 );
-			}
-
-			$updated = true;
-
-		}
-
-		$message = $this->get_approved_email_message();
-		$subject = $this->get_approved_email_subject();
-		$enable = $this->is_approve_email_enabled();
-		$default = $this->is_approve_email_by_default();
-
 		?>
 		<div class="wrap">
 			<h1><?php esc_html_e( 'Comment Notifications', 'comment-approved-notify' ); ?></h1>
