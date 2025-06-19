@@ -395,7 +395,11 @@ class Plugin {
 		$subject = $this->replace_shortcodes( $this->get_approved_email_subject(), $map_fields );
 
 		if ( $notification && $subject ) {
-			$comment_notify->notify_approve( $notification, $subject );
+			$notified = $comment_notify->notify( $notification, $subject );
+
+			if ( $notified ) {
+				$comment_notify->set_approve_notified();
+			}
 		}
 	}
 
