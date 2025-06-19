@@ -23,6 +23,10 @@ class Comment {
 		return new self( get_comment( $comment_id ) );
 	}
 
+	public function is_approved(): bool {
+		return 'approve' === $this->comment->comment_approved;
+	}
+
 	public function get_email(): ?string {
 		if ( ! empty( $this->comment->comment_author_email ) && is_email( $this->comment->comment_author_email ) ) {
 			return $this->comment->comment_author_email;
