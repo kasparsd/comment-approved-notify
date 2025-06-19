@@ -189,15 +189,19 @@ class CommentApprovedNotify {
 			return;
 		}
 
-		$comment_permalink = get_comment_link( $comment );
-
-		$map_fields = array(
-			'[name]' => $comment->comment_author,
-			'[permalink]' => $comment_permalink,
-			'%name%' => $comment->comment_author,
-			'%permalink%' => $comment_permalink,
+		$template_values = array(
+			'name' => $comment->comment_author,
+			'permalink' => get_comment_link( $comment ),
+			'post_title' => get_the_title( $comment->comment_post_ID ),
+			'post_permalink' => get_permalink( $comment->comment_post_ID ),
 		);
 
+		$map_fields = [];
+		foreach ( $template_values as $key => $key_value ) {
+			$map_fields[ sprintf( '[%s]', $key ) ] = $key_value;
+			$map_fields[ sprintf( '%%%s%%', $key ) ] = $key_value;
+		}
+		
 		$notification = $this->get_approved_email_message();
 		$subject = $this->get_approved_email_subject();
 
