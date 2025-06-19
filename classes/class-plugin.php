@@ -461,7 +461,7 @@ class Plugin {
 				</p>',
 				esc_attr( self::SETTINGS_SECTION_APPROVE ),
 				checked( $this->is_approve_email_by_default(), true, false ),
-				esc_html__( 'Email me when my comment gets approved.', 'comment-approved-notify' )
+				esc_html__( 'Email me when my comment is approved.', 'comment-approved-notify' )
 			);
 		}
 
