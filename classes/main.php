@@ -235,7 +235,7 @@ class CommentApprovedNotify {
 	public function approve_comment_posted( $comment_id, $comment_object ) {
 
 		if ( isset( $_POST['comment-approved_notify-me'] ) ) {
-			add_comment_meta( $comment_id, 'notify_me', mktime() );
+			add_comment_meta( $comment_id, 'notify_me', time() );
 		}
 
 	}
