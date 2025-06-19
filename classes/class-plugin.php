@@ -474,14 +474,14 @@ class Plugin {
 		}
 
 		if ( $this->is_all_comments_email_enabled() ) {
-			$fields[ self::SETTINGS_SECTION_REPLY ] = sprintf(
+			$fields[ self::SETTINGS_SECTION_ALL_COMMENTS ] = sprintf(
 				'<p class="%1$s">
 					<label>
 						<input type="checkbox" name="%1$s" %2$s value="1" />
 						%3$s
 					</label>
 				</p>',
-				esc_attr( self::SETTINGS_SECTION_REPLY ),
+				esc_attr( self::SETTINGS_SECTION_ALL_COMMENTS ),
 				checked( false, true, false ),
 				esc_html__( 'Email me all new comments.', 'comment-approved-notify' )
 			);
