@@ -11,7 +11,11 @@ Text Domain: comment-approved-notify
 Domain Path: /languages/
 */
 
-require_once __DIR__ . '/classes/class-comment.php';
-require_once __DIR__ . '/classes/main.php';
+use Comment_Notifications\Plugin;
 
-add_action( 'plugins_loaded', [ CommentApprovedNotify::class, 'instance' ] );
+require_once __DIR__ . '/classes/class-comment.php';
+require_once __DIR__ . '/classes/class-plugin.php';
+
+$comment_notifications_plugin = new Plugin( __FILE__ );
+
+add_action( 'plugins_loaded', [ $comment_notifications_plugin, 'init' ] );

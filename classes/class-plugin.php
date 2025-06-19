@@ -1,27 +1,24 @@
 <?php
 
-use Comment_Notifications\Comment;
+namespace Comment_Notifications;
 
-class CommentApprovedNotify {
+class Plugin {
+	private string $plugin_file;
 
-	protected function __construct() {
-		add_action( 'admin_menu', array( $this, 'add_default_settings' ) );
+	private const string SETTINGS_SLUG = 'comment_notifications';
+
+	private const string SETTINGS_SECTION_APPROVE = 'comment_notifications__approve';
+
+	public function __construct( string $plugin_file ) {
+		$this->plugin_file = $plugin_file;
+	}
+
+	public function init() {
+		add_action( 'admin_menu', array( $this, 'action_register_settings' ) );
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_action( 'comment_form', array( $this, 'approve_comment_optin' ), 10, 1 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
 		add_filter( 'edit_comment_misc_actions', array( $this, 'comment_notify_status' ), 10, 2 );
-	}
-
-	public static function instance() {
-
-		static $instance;
-
-		if ( ! isset( $instance ) ) {
-			$instance = new self();
-		}
-
-		return $instance;
-
 	}
 
 	private function get_approved_email_message() {
@@ -56,17 +53,66 @@ class CommentApprovedNotify {
 		return (bool) get_option( 'comment_approved_default', 0 );
 	}
 
-	public function add_default_settings() {
-
-		// @todo Move to settings API
-		add_options_page(
+	public function action_register_settings() {
+		$hook = add_options_page(
 			__( 'Comment Notifications', 'comment-approved-notify' ),
 			__( 'Comment Notifications', 'comment-approved-notify' ),
 			'manage_options',
-			'comment_approved-settings',
+			self::SETTINGS_SLUG,
 			array( $this, 'settings' ),
 		);
 
+		add_settings_section(
+			self::SETTINGS_SECTION_APPROVE,
+			__( 'Comment Approval Notifications', 'comment-approved-notify' ),
+			null,
+			self::SETTINGS_SLUG
+		);
+
+		// add_action( 'load-' . $hook, [ $this, 'action_render_settings' ] );
+	}
+
+	protected function add_settings_field( Field $field, string $section ) {
+		register_setting(
+			self::SETTINGS_SLUG,
+			$field->id(),
+			[ 'sanitize_callback' => [ $field, 'sanitize' ] ]
+		);
+
+		$classes = [
+			$field->setting( 'required' ) ? 'mail-pilot__settings-field-required' : null,
+		];
+
+		add_settings_field(
+			$field->id(),
+			$field->title(),
+			function () use ( $field ) {
+				foreach ( $field->get_errors() as $error ) {
+					$error_type = 'notice';
+					$error_data = $error->get_error_data();
+
+					if ( isset( $error_data['type'] ) ) {
+						$error_type = $error_data['type'];
+					}
+
+					printf(
+						'<div class="notice notice-%s inline"><p>%s</p></div>',
+						esc_attr( sanitize_key( $error_type ) ),
+						esc_html( $error->get_error_message() )
+					);
+				}
+
+				echo wp_kses_post( (string) $field->setting( 'before' ) );
+				echo $field->render();
+				echo wp_kses_post( (string) $field->setting( 'after' ) );
+			},
+			self::SETTINGS_SLUG,
+			$section,
+			[
+				'label_for' => $field->id(),
+				'class' => implode( ' ', array_filter( $classes ) ),
+			]
+		);
 	}
 
 	public function settings() {
@@ -108,69 +154,16 @@ class CommentApprovedNotify {
 
 		?>
 		<div class="wrap">
-
-			<?php if ( $updated ) : ?>
-			<div id="message" class="updated fade">
-				<p><?php esc_html_e( 'Options saved', 'comment-approved-notify' ) ?></p>
-			</div>
-			<?php endif; ?>
-
 			<h1><?php esc_html_e( 'Comment Notifications', 'comment-approved-notify' ); ?></h1>
-			<p><?php esc_html_e( 'Configure notifications sent to comment authors.', 'comment-approved-notify' ); ?></p>
-
-			<form method="post">
-				<?php wp_nonce_field( 'comment_approved_settings' ); ?>
-
-				<table class="form-table" id="wp-comment-approved-settings">
-					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Approval Notifications', 'comment-approved-notify' ); ?></label></th>
-						<td>
-							<label>
-								<input type="checkbox" name="comment_approved_enable" value="1" <?php checked( $enable ); ?> />
-								<?php esc_html_e( 'Allow users to opt-in to notifications when a comment is approved', 'comment-approved-notify' ); ?>
-							</label>
-						</td>
-					</tr>
-					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Default Setting', 'comment-approved-notify' ); ?></label></th>
-						<td>
-							<label>
-								<input type="checkbox" name="comment_approved_default" value="1" <?php checked( $default ); ?> />
-								<?php esc_html_e( 'Make the checkbox checked by default on the comment form', 'comment-approved-notify' ); ?>
-							</label>
-						</td>
-					</tr>
-					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Subject', 'comment-approved-notify' ); ?></label></th>
-						<td>
-							<input type="text" name="comment_approved_subject" class="large-text" value="<?php echo esc_attr( $subject ); ?>" />
-						</td>
-					</tr>
-					<tr class="default-row">
-						<th><label><?php esc_html_e( 'Message', 'comment-approved-notify' ); ?></label></th>
-						<td>
-							<textarea cols="50" rows="10" class="large-text" name="comment_approved_message"><?php echo esc_textarea( $message ); ?></textarea>
-							<p class="help">
-								<?php esc_html_e( 'Available shortcodes:', 'comment-approved-notify' ); ?>
-								<code>[permalink]</code>, 
-								<code>[name]</code>,
-								<code>[post_title]</code>
-								<code>[post_permalink]</code>
-							</p>
-						</td>
-					</tr>
-					<tr class="default-row">
-						<th></th>
-						<td>
-							<input type="submit" class="button submit" name="comment_approved_settings" value="<?php esc_attr_e( 'Save', 'comment-approved-notify' ); ?>" />
-						</td>
-					</tr>
-				</table>
+			<form method="post" action="options.php">
+				<?php
+					settings_fields( self::SETTINGS_SLUG );
+					do_settings_sections( self::SETTINGS_SLUG );
+					submit_button();
+				?>
 			</form>
-
 		</div>
 		<?php
-
 	}
 
 	public function approve_comment_callback( string $new_status, string $old_status, WP_Comment $comment ) {
