@@ -162,25 +162,6 @@ class CommentApprovedNotify {
 
 	}
 
-	public function should_notify_comment_author( $comment ) {
-
-		if ( is_object( $comment ) && isset( $comment->comment_ID ) ) {
-			$comment_id = $comment->comment_ID;
-		} else {
-			$comment_id = $comment;
-		}
-
-		$notify_me = get_comment_meta( $comment_id, 'notify_me', true );
-		$notify_sent = get_comment_meta( $comment_id, 'comment_approve_notify_sent', true );
-
-		if ( ! empty( $notify_me ) && empty( $notify_sent ) ) {
-			return true;
-		}
-
-		return false;
-
-	}
-
 	public function approve_comment_callback( string $new_status, string $old_status, WP_Comment $comment ) {
 		// Notify only if the comment is approved
 		if ( $old_status === $new_status || 'approved' !== $new_status ) {
