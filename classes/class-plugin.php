@@ -426,11 +426,11 @@ class Plugin {
 			],
 			self::SETTINGS_SECTION_REPLY => [
 				'label' => __( 'comment has replies', 'comment-approved-notify' ),
-				'checked' => false, // $comment_notify->is_notify_reply_enabled(),
+				'checked' => $comment_notify->is_notify_replies_enabled(),
 			],
 			self::SETTINGS_SECTION_ALL_COMMENTS => [
 				'label' => __( 'all new comments on the same post', 'comment-approved-notify' ),
-				'checked' => false, // $comment_notify->is_notify_all_comments_enabled(),
+				'checked' => $comment_notify->is_notify_all_comments_enabled(),
 			],
 		];
 
