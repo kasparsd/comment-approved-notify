@@ -49,14 +49,12 @@ class CommentApprovedNotify {
 	public function add_default_settings() {
 
 		// @todo Move to settings API
-		add_submenu_page(
-			'options-general.php',
+		add_options_page(
 			__( 'Comment approved', 'comment-approved-notify' ),
 			__( 'Comment approved', 'comment-approved-notify' ),
 			'manage_options',
 			'comment_approved-settings',
 			array( $this, 'settings' ),
-			'dashicons-admin-tools'
 		);
 
 	}
