@@ -63,6 +63,7 @@ class Plugin {
 		add_action( 'transition_comment_status', array( $this, 'approve_comment_callback' ), 10, 3 );
 		add_action( 'wp_insert_comment', array( $this, 'approve_comment_posted' ), 10, 2 );
 		add_filter( 'comment_form_fields', [ $this, 'filter_comment_form_fields' ], 20 );
+		add_action( 'comment_form', array( $this, 'action_comment_form' ), 10, 1 );
 		add_action( 'add_meta_boxes', [ $this, 'action_add_meta_boxes' ] );
 	}
 
@@ -72,6 +73,13 @@ class Plugin {
 		}
 		
 		return $fields;
+	}
+
+	public function action_comment_form() {
+		// Print these only for logged-in users since the `comment_form_fields` filter doesn't apply to them.
+		if ( is_user_logged_in() ) {
+			echo implode( '', $this->get_comment_fields() );
+		}
 	}
 
 	public function action_populate_defaults() {
