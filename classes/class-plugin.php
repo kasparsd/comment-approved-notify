@@ -438,7 +438,7 @@ class Plugin {
 			$fields[ $section ] = sprintf(
 				'<li class="%1$s">
 					<label>
-						<input type="checkbox" name="%1$s" %2$s />
+						<input type="checkbox" name="%1$s" value="1" %2$s />
 						%3$s
 					</label>
 				</li>',
