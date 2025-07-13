@@ -7,6 +7,7 @@ use Comment_Notifications\Settings\Field_Checkbox;
 use Comment_Notifications\Settings\Field_Text;
 use Comment_Notifications\Settings\Field_Textarea;
 use Comment_Notifications\Settings\Store_Option;
+use RuntimeException;
 use WP_Comment;
 
 class Plugin {
@@ -65,6 +66,7 @@ class Plugin {
 		add_filter( 'comment_form_fields', [ $this, 'filter_comment_form_fields' ], 20 );
 		add_action( 'comment_form', array( $this, 'action_comment_form' ), 10, 1 );
 		add_action( 'add_meta_boxes', [ $this, 'action_add_meta_boxes' ] );
+		add_action( 'edit_comment', [ $this, 'action_edit_comment' ] );
 	}
 
 	public function filter_comment_form_fields( array $fields ): array {
@@ -427,11 +429,11 @@ class Plugin {
 		// TODO: show the last notification timestamp for each.
 		$fields = [
 			self::SETTINGS_SECTION_APPROVE => [
-				'label' => __( 'comment is approved', 'comment-approved-notify' ),
+				'label' => __( 'their comment is approved', 'comment-approved-notify' ),
 				'checked' => $comment_notify->is_notify_approve_enabled(),
 			],
 			self::SETTINGS_SECTION_REPLY => [
-				'label' => __( 'comment has replies', 'comment-approved-notify' ),
+				'label' => __( 'their comment has a reply', 'comment-approved-notify' ),
 				'checked' => $comment_notify->is_notify_replies_enabled(),
 			],
 			self::SETTINGS_SECTION_ALL_COMMENTS => [
@@ -455,12 +457,54 @@ class Plugin {
 		}
 
 		printf( 
-			'<p>%s</p><ul>%s</ul><p><a class="button" href="%s">%s</a>',
+			'<p>%s</p>
+			<ul>%s</ul>
+			<p><a href="%s">%s</a></p>',
 			esc_html__( 'Comment author enabled email notifications when:', 'comment-approved-notify' ),
 			implode( '', $fields ),
 			esc_url( $this->get_settings_url() ),
-			esc_html__( 'Notification Settings', 'comment-approved-notify' )
+			esc_html__( 'Configure Notifications', 'comment-approved-notify' )
 		);
+	}
+
+	public function action_edit_comment( int $comment_id ) {
+		$comment_notify = Comment::from_comment_id( $comment_id );
+
+		if ( ! empty( $_POST[ self::SETTINGS_SECTION_APPROVE ] ) ) {
+			$comment_notify->enable_notify_approve();
+		}
+
+		if ( ! empty( $_POST[ self::SETTINGS_SECTION_REPLY ] ) ) {
+			$comment_notify->enable_notify_replies();
+		}
+
+		if ( ! empty( $_POST[ self::SETTINGS_SECTION_ALL_COMMENTS ] ) ) {
+			$comment_notify->enable_notify_all_comments();
+		}
+	}
+
+	private function get_unsubscribe_url( Comment $comment, string $action ): string {
+		return add_query_arg(
+			[
+				'comment_notify__unsubscribe_hash' => $comment->get_unsubscribe_token( $action ),
+				'comment_notify__comment_id' => $comment->get_id(),
+			],
+			get_comment_link( $comment )
+		);
+	}
+
+	private function unsubscribe( int $comment_id, string $token, string $action ): void {
+		$comment = Comment::from_comment_id( $comment_id );
+
+		if ( ! $comment ) {
+			throw new RuntimeException( __( 'Comment not found.', 'comment-approved-notify' ) );
+		}
+
+		if ( $comment->is_unsubscribe_token_valid( trim( $token ), $action ) ) {
+			$comment->notify_disable();
+		} else {
+			throw new RuntimeException( __( 'Invalid unsubscribe token.', 'comment-approved-notify' ) );
+		}
 	}
 
 	public function approve_comment_callback( string $new_status, string $old_status, WP_Comment $comment ) {
