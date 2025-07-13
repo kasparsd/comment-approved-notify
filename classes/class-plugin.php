@@ -85,7 +85,7 @@ class Plugin {
 	}
 
 	public function action_populate_defaults() {
-		$this->notify_approve_message_default = __( "Hi [name],\n\nThanks for your comment! It has been approved. To view the post, look at the link below.\n\n[permalink]", 'comment-approved-notify' );
+		$this->notify_approve_message_default = __( "Hi [name],\n\nYour comment on [post_title] has been approved:\n\n[permalink]", 'comment-approved-notify' );
 		$this->notify_approve_subject_default = sprintf(
 			'[%s] %s',
 			get_bloginfo( 'name' ),
@@ -241,6 +241,8 @@ class Plugin {
 			null,
 			self::SETTINGS_SLUG
 		);
+
+		add_settings_error( self::SETTINGS_SECTION_REPLY, 'comment-reply-notification', __( 'Comment reply notifications are only sent if the comment author has enabled them in the comment form.', 'comment-approved-notify' ), 'info' );
 
 		$this->add_settings_field(
 			new Field_Checkbox(
