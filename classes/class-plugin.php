@@ -156,14 +156,12 @@ class Plugin {
 			'comment_content',
 			'comment_permalink',
 			'comment_author',
+			'unsubscribe_link', // Removed for approval notificaions since that happens only once.
 		];
 
-		$shortcodes = implode( 
-			', ', 
-			array_map(
-				fn ( $shortcode ) => sprintf( '<code>[%s]</code>', $shortcode ),
-				$shortcodes_available
-			)
+		$shortcodes = array_map(
+			fn ( $shortcode ) => sprintf( '<code>[%s]</code>', $shortcode ),
+			$shortcodes_available
 		);
 
 		/**
@@ -224,7 +222,7 @@ class Plugin {
 					'help' => sprintf(
 						/* translators: %s is a list of available shortcodes */
 						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
-						$shortcodes
+						implode( ', ', array_slice( $shortcodes, 0, -1 ) )
 					),
 				]
 			),
@@ -287,7 +285,7 @@ class Plugin {
 					'help' => sprintf(
 						/* translators: %s is a list of available shortcodes */
 						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
-						$shortcodes
+						implode( ', ', $shortcodes )
 					),
 				]
 			),
@@ -350,7 +348,7 @@ class Plugin {
 					'help' => sprintf(
 						/* translators: %s is a list of available shortcodes */
 						__( 'Available shortcodes: %s', 'comment-approved-notify' ),
-						$shortcodes
+						implode( ', ', $shortcodes )
 					),
 				]
 			),

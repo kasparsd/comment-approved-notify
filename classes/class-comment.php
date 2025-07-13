@@ -95,18 +95,18 @@ class Comment {
 		return $this->is_notify_approve_enabled() && ! $this->has_notified_approve();
 	}
 
-	public function get_unsubscribe_token(): string {
+	public function get_unsubscribe_token( string $action ): string {
 		$token = $this->get_meta( self::META_KEY_TOKEN_UNSUBSCRIBE );
 
 		if ( empty( $token ) ) {
-			$this->set_meta( self::META_KEY_TOKEN_UNSUBSCRIBE, sha1( wp_generate_password( 32, false ) ) );
+			$this->set_meta( self::META_KEY_TOKEN_UNSUBSCRIBE, wp_generate_password( 32, false ) );
 		}
 
-		return $token;
+		return sha1( $action . $token );
 	}
 
-	public function is_unsubscribe_token_valid( string $token ): bool {
-		$stored_token = $this->get_unsubscribe_token();
+	public function is_unsubscribe_token_valid( string $token, string $action ): bool {
+		$stored_token = $this->get_unsubscribe_token( $action );
 		
 		if ( ! empty( $stored_token ) && hash_equals( $stored_token, trim( $token ) ) ) {
 			return true;
@@ -116,8 +116,12 @@ class Comment {
 	}
 
 	public function notify_disable(): void {
+		// Disable all notifications.
 		delete_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_REPLIES );
 		delete_comment_meta( $this->comment->comment_ID, self::META_KEY_NOTIFY_ALL );
+
+		// And remove the token since no longer needed.
+		delete_comment_meta( $this->comment->comment_ID, self::META_KEY_TOKEN_UNSUBSCRIBE );
 	}
 
 	public function notify( string $message, string $subject ): bool {
