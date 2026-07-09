@@ -1,13 +1,12 @@
-=== Comment Approval Notifications ===
+=== Comment Notifications ===
 
-Contributors: nielsvanrenselaar, kasparsd   
-Donate link:    
-Tags: comment, approved, notifcation, message, approval   
-Requires at least: 3.0.0   
-Tested up to: 4.3   
-Stable tag: trunk   
-License: GPLv2 or later   
-License URI: http://www.gnu.org/licenses/gpl-2.0.html   
+Contributors: nielsvanrenselaar, kasparsd
+Tags: comment, approved, notifcation, message, approval
+Requires at least: 3.0.0
+Tested up to: 7.0
+Stable tag: trunk
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 == Description ==
 
@@ -20,9 +19,9 @@ This plugin is a fork of the [Comment Approved](https://wordpress.org/plugins/co
 
 == Installation ==
 
-1. Upload the folder `comment-approved-notify` to the `/wp-content/plugins/` directory
-2. Activate the plugin through the 'Plugins' menu in WordPress
-3. The settings are accessible trough the settings menu in the sidebar
+1. Upload the folder `comment-notifications` to the `/wp-content/plugins/` directory.
+2. Activate the plugin through the 'Plugins' menu in WordPress.
+3. The settings are accessible trough the settings menu in the sidebar.
 
 
 == Screenshots ==
