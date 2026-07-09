@@ -10,7 +10,7 @@
  * Text Domain: comment-approved-notify
  */
 
-use Comment_Notifications\Plugin;
+namespace Comment_Notifications;
 
 require_once __DIR__ . '/classes/settings/class-field.php';
 require_once __DIR__ . '/classes/settings/class-field-checkbox.php';
@@ -21,6 +21,6 @@ require_once __DIR__ . '/classes/settings/class-store-option.php';
 require_once __DIR__ . '/classes/class-comment.php';
 require_once __DIR__ . '/classes/class-plugin.php';
 
-$comment_notifications_plugin = new Plugin( __FILE__ );
+$plugin = new Plugin( __FILE__ );
 
-add_action( 'plugins_loaded', [ $comment_notifications_plugin, 'init' ] );
+add_action( 'plugins_loaded', [ $plugin, 'init' ] );
