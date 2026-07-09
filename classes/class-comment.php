@@ -107,7 +107,7 @@ class Comment {
 
 	public function is_unsubscribe_token_valid( string $token, string $action ): bool {
 		$stored_token = $this->get_unsubscribe_token( $action );
-		
+
 		if ( ! empty( $stored_token ) && hash_equals( $stored_token, trim( $token ) ) ) {
 			return true;
 		}
