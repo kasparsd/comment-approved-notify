@@ -1,6 +1,17 @@
 {
+	"$schema": "https://schemas.wp.org/trunk/wp-env.json",
+	"multisite": true,
+	"testsEnvironment": false,
+	"phpVersion": "7.4",
 	"core": "./wordpress",
-	"plugins": [
-		"."
-	]
+	"mappings": {
+		"wp-content": "./wp-content",
+		"wp-content/plugins/comment-notifications": "."
+	},
+	"config": {
+		"WP_DEBUG": true,
+		"WP_DEBUG_LOG": true,
+		"WP_DEBUG_DISPLAY": true,
+		"SCRIPT_DEBUG": true
+	}
 }
