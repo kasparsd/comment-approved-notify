@@ -238,11 +238,11 @@ class Plugin {
 		add_settings_section(
 			self::SETTINGS_SECTION_REPLY,
 			__( 'Comment Replies', 'comment-approved-notify' ),
-			null,
+			function () {
+				esc_html_e( 'Comment reply notifications require that threaded comments are enabled.', 'comment-approved-notify' );
+			},
 			self::SETTINGS_SLUG
 		);
-
-		add_settings_error( self::SETTINGS_SECTION_REPLY, 'comment-reply-notification', __( 'Comment reply notifications are only sent if the comment author has enabled them in the comment form.', 'comment-approved-notify' ), 'info' );
 
 		$this->add_settings_field(
 			new Field_Checkbox(
